@@ -5,10 +5,12 @@ import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
-@RequestMapping("/api/animals")
+@Controller
+@RequestMapping("/animals")
 public class AnimalController {
 
     private final AnimalService animalService;
@@ -18,36 +20,68 @@ public class AnimalController {
     }
 
     // return a list of all animals
-    @GetMapping
-    public List<Animal> getAllAnimals() {
-        return animalService.getAllAnimals();
+    @GetMapping("/all")
+    public String getAllAnimals(Model model) {
+        List<Animal> animals = animalService.getAllAnimals();
+        System.out.println("Animals found: " + animals.size());
+        model.addAttribute("animals", animals);
+        return "animal-list";
     }
 
     // get a specific animal by its id
-    @GetMapping("/{animalId}")
+    @GetMapping("/animal-details")
     public Optional<Animal> getAnimalById(@PathVariable int animalId) {
         return animalService.getAnimalById(animalId);
     }
 
-    // adds a new animal to the database and saves it
-    @PostMapping
-    public ResponseEntity<Animal> addAnimal(@RequestBody Animal animal) {
-        Animal savedAnimal = animalService.addAnimal(animal);
-        return new ResponseEntity<>(savedAnimal, HttpStatus.CREATED);
+    // display the create form
+    @GetMapping("/add")
+    public String showCreateAnimalForm(Model model) {
+        model.addAttribute("animal", new Animal());
+        return "animal-create";
+    }
+
+    // create new animal
+    @PostMapping("/add")
+    public String addAnimal(@ModelAttribute Animal animal) {
+        animalService.saveAnimal(animal);
+        return "redirect:/animals/all";
+    }
+
+    // display the update form
+    @GetMapping("/update/{id}")
+    public String showUpdateAnimalForm(@PathVariable int id, Model model) {
+        Animal animal = animalService.getAnimalById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid animal ID: " + id));
+        model.addAttribute("animal", animal);
+        return "animal-update";
     }
 
     // updates an existing animal inside the database
-    @PutMapping("/{animalId}")
-    public ResponseEntity<Animal> updateAnimal(@PathVariable int animalId, @RequestBody Animal animalDetails) {
-        Animal updatedAnimal = animalService.updateAnimal(animalId, animalDetails);
-        return new ResponseEntity<>(updatedAnimal, HttpStatus.OK);
+    @PostMapping("/update/{id}")
+    public String updateAnimal(@PathVariable int id, @ModelAttribute Animal animal) {
+        animalService.updateAnimal(id, animal);
+        return "redirect:/animals/all";
     }
 
     // deletes an existing animal from the database
-    @DeleteMapping("/{animalId}")
-    public ResponseEntity<Void> deleteAnimal(@PathVariable int animalId) {
-        animalService.deleteAnimal(animalId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    // @DeleteMapping("/{animalId}")
+    @GetMapping("/delete/{id}")
+    public String deleteAnimal(@PathVariable int id) {
+        animalService.deleteAnimal(id);
+        return "redirect:/animals/all";
+    }
+
+    // display details for a specific animal
+    @GetMapping("/details/{id}")
+    public String showAnimalDetails(@PathVariable int id, Model model) {
+        Optional<Animal> animal = animalService.getAnimalById(id);
+        if (animal.isPresent()) {
+            model.addAttribute("animal", animal.get());
+        } else {
+            return "redirect:/animals/all";
+        }
+        return "animal-details";
     }
 
     // gets all animals by a certain class or species

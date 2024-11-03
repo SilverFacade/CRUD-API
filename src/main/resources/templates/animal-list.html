@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animal List</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+</head>
+<body>
+<h1>Animal List</h1>
+<div class="create-button-container">
+    <a th:href="@{/animals/add}" class="btn btn-create">Create New Animal</a>
+</div>
+<div class="animal-cards-container">
+    <div th:each="animal : ${animals}" class="animal-card">
+        <a th:href="@{/animals/details/{id}(id=${animal.animalId})}" style="text-decoration: none; color: inherit;">
+            <h2 th:text="${animal.name}">Animal Name</h2>
+            <p><strong>Class:</strong> <span th:text="${animal.animalClass}">Animal Class</span></p>
+            <p><strong>Habitat:</strong> <span th:text="${animal.habitat}">Animal Habitat</span></p>
+        </a>
+        <div class="card-buttons">
+            <form th:action="@{/animals/update/{id}(id=${animal.animalId})}" method="get">
+                <button type="submit" class="btn btn-edit">Edit</button>
+            </form>
+            <form th:action="@{/animals/delete/{id}(id=${animal.animalId})}" method="get">
+                <button type="submit" class="btn btn-delete">Delete</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

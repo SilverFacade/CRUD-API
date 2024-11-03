@@ -22,11 +22,11 @@ public class AnimalService {
         return animalRepository.findById(animalId);
     }
 
-    public Animal addAnimal(Animal animal) {
-        return animalRepository.save(animal);
+    public void saveAnimal(Animal animal) {
+        animalRepository.save(animal);
     }
 
-    public Animal updateAnimal(int animalId, Animal animalDetails) {
+    public void updateAnimal(int animalId, Animal animalDetails) {
         Animal existingAnimal = animalRepository.findById(animalId)
                 .orElseThrow(() -> new EntityNotFoundException("Animal with ID: " + animalId + " does not exist."));
 
@@ -36,7 +36,7 @@ public class AnimalService {
         existingAnimal.setHabitat(animalDetails.getHabitat());
         existingAnimal.setDescription(animalDetails.getDescription());
 
-        return animalRepository.save(existingAnimal);
+        animalRepository.save(existingAnimal);
     }
 
     public void deleteAnimal(int animalId) {
